@@ -1,0 +1,57 @@
+from bs4 import BeautifulSoup
+import requests 
+from io import BytesIO
+import pandas as pd
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud, ImageColorGenerator, STOPWORDS
+from PIL import Image
+from os import path,getcwd
+import numpy as np
+from nltk.tokenize import word_tokenize
+ 
+Id = input("Ingrese la URL del usuario que desea encontrar: ")
+CompEx = bool
+ 
+url = "https://es.stackoverflow.com/users/" + Id + "/?tab=tags"
+page = requests.get (url)
+ 
+if page.status_code == 404:
+  print(" USUARIO NO ENCONTRADO")
+
+else:
+  LinkForName = "https://es.stackoverflow.com/users/"+Id
+  Pag = requests.get(LinkForName)
+  soup = BeautifulSoup(Pag.content,"html.parser")
+  nombUsr = soup.find('div',{'class':'grid--cell fw-bold'}).text
+  print("Usuario: "+ nombUsr)
+  print("URL: " + url)
+  
+  soup = BeautifulSoup (page.content,'html.parser')
+  print("\033[1;33m"+"\nEspere Un Momento, Se Estan Localizando Los Datos...")
+ 
+  listaTags = list()
+  listaPuntos = list()
+    
+  for PagRang in range(1,15):
+    url2 = 'https://es.stackoverflow.com/users/'+Id+'/?tab=tags&sort=votes&page={:}'.format(PagRang)
+    Pag2 = requests.get(url2)
+    soup2 = BeautifulSoup(Pag2.content,"html.parser")
+    contentTag = soup2.find_all("td")
+    for tags in contentTag:
+      tags2 = tags.find_all("a")
+      tagsvote = tags.find_all("div")
+      votes = tagsvote[0].text.replace("k","000")
+      votesInt = int(votes)
+      etiq = tags2[0].text
+      listaTags.append(etiq)
+      if votesInt > 0:
+        listaPuntos.append(votesInt)
+ 
+  dic = dict (zip (tuple (listaTags), tuple (listaPuntos)))
+  nubImg = "https://sun9-48.userapi.com/4-fHkt0g7R20AqmtNpMs3Caf2qkdUUCGFwZ9NQ/0Kz4uJqrz1I.jpg"
+  resp = requests.get (nubImg)
+  ImgArr = np.asarray (Image.open (BytesIO (resp.content)))
+  wordcld = WordCloud (background_color = 'white', mask = ImgArr, height=1000, width=1000  ,max_words=1000).generate_from_frequencies (dic)
+  plt.figure (figsize = (17, 17))
+  plt.imshow (wordcld)
+  plt.axis ("off")
