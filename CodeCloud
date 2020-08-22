@@ -16,16 +16,17 @@ url = "https://es.stackoverflow.com/users/" + Id + "/?tab=tags"
 page = requests.get (url)
  
 if page.status_code == 404:
-  print(" USUARIO NO ENCONTRADO")
-
+  print('\033[91m'+"\nE       R       R       R       O       R\n\n-----------------------------------------")
+  print("---------- LO SENTIMOS ------------------\n-----------------------------------------\n      USUARIO NO ENCONTRADO      \n-----------------------------------------")
+  print("\n\nEl Id: " + Id + " No Se Encuentra Registrado")
 else:
   LinkForName = "https://es.stackoverflow.com/users/"+Id
   Pag = requests.get(LinkForName)
   soup = BeautifulSoup(Pag.content,"html.parser")
   nombUsr = soup.find('div',{'class':'grid--cell fw-bold'}).text
-  print("Usuario: "+ nombUsr)
-  print("URL: " + url)
-  
+  print("\033[95m"+"\n-----------------------------------------------------------------------------\n\n-----> Usuario: "+ nombUsr)
+  print(""+"\n-----------------------------------------------------------------------------\n\n-----> URL: " + url)
+  print("\n-----------------------------------------------------------------------------")
   soup = BeautifulSoup (page.content,'html.parser')
   print("\033[1;33m"+"\nEspere Un Momento, Se Estan Localizando Los Datos...")
  
